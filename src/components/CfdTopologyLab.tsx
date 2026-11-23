@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Activity, ArrowUpRight, Flame, RotateCcw, Sliders, Wind } from 'lucide-react';
+import { Activity, ArrowUpRight, Camera, Flame, Maximize2, Pause, Play, RotateCcw, Sliders, Wind } from 'lucide-react';
 
 type CfdFieldMode = 'topology' | 'vorticity' | 'pressure' | 'thermal';
 type ObstacleType = 'cylinder' | 'airfoil' | 'none';
@@ -48,6 +48,7 @@ const FRAG = /* glsl */ `
   uniform float uTime;
   uniform float uReynolds;
   uniform float uVelocity;
+  uniform float uAngleRad;
   uniform float uMode;
   uniform float uObstacle;
 
@@ -80,14 +81,14 @@ const FRAG = /* glsl */ `
     return v;
   }
 
-  // Signed distance for cylinder or NACA-like symmetric airfoil
-  float obstacleSDF(vec2 p, float type) {
+  // Signed distance for cylinder or NACA-like symmetric airfoil with live Angle of Attack (AoA)
+  float obstacleSDF(vec2 p, float type, float aoaRad) {
     if (type > 1.5) return 10.0; // Free field
     if (type < 0.5) {
       return length(p) - 0.145; // Cylinder
     }
-    // Symmetric NACA-inspired teardrop airfoil tilted slightly
-    float ang = -0.14;
+    // Symmetric NACA-0012-inspired airfoil pitched by Angle of Attack
+    float ang = -aoaRad;
     mat2 rot = mat2(cos(ang), -sin(ang), sin(ang), cos(ang));
     vec2 q = rot * p;
     q.x += 0.05;
@@ -144,29 +145,31 @@ const FRAG = /* glsl */ `
     // Obstacle positioned slightly upstream (left of center)
     vec2 obsCenter = vec2(-0.24 * aspect.x, 0.0);
     vec2 rel = p - obsCenter;
-    float sdf = obstacleSDF(rel, uObstacle);
+    float sdf = obstacleSDF(rel, uObstacle, uAngleRad);
 
     // Normalized Reynolds factor (0 = laminar, 1 = turbulent shedding)
     float reNorm = clamp((uReynolds - 100.0) / 2300.0, 0.0, 1.0);
     float speed = 0.6 + uVelocity * 1.4;
     float t = uTime * speed;
 
-    // Potential flow streamfunction + Kármán vortex street wake
+    // Potential flow streamfunction + Angle of Attack circulation + Kármán wake
     float r2 = dot(rel, rel) + 0.018;
     float obsStrength = uObstacle > 1.5 ? 0.0 : 1.0;
+    float aoaDeflect = (uObstacle > 0.5 && uObstacle < 1.5) ? sin(uAngleRad) * 0.22 : 0.0;
 
-    // Streamfunction psi around obstacle
-    float psi = rel.y * (1.0 - obsStrength * 0.022 / r2);
+    // Streamfunction psi around obstacle with circulation term
+    float psi = (rel.y - aoaDeflect * smoothstep(-0.1, 0.45, rel.x)) * (1.0 - obsStrength * 0.022 / r2);
 
-    // Downstream wake envelope
+    // Downstream wake envelope (broadens at high AoA stall)
+    float stallBoost = (uObstacle > 0.5 && uObstacle < 1.5) ? smoothstep(0.16, 0.32, abs(uAngleRad)) * 0.45 : 0.0;
     float downstream = smoothstep(-0.04, 0.22, rel.x) * obsStrength;
-    float wakeWidth = exp(-pow(rel.y / (0.18 + max(rel.x, 0.0) * 0.26), 2.0));
+    float wakeWidth = exp(-pow((rel.y - aoaDeflect * 0.65) / (0.18 + stallBoost * 0.2 + max(rel.x, 0.0) * 0.26), 2.0));
 
     // Alternating Karman vortices downstream
     float shedFreq = 4.2 + reNorm * 6.5;
     float karman = sin(rel.x * (9.0 + reNorm * 7.0) - t * shedFreq)
-                 * cos(rel.y * 10.0)
-                 * downstream * wakeWidth * (0.25 + reNorm * 0.85);
+                 * cos((rel.y - aoaDeflect * 0.5) * 10.0)
+                 * downstream * wakeWidth * (0.25 + reNorm * 0.85 + stallBoost);
 
     // Turbulence eddies
     float turb = (fbm(vec2(p.x * 3.8 - t * 0.9, p.y * 3.8 + karman * 0.6)) - 0.5) * (0.25 + reNorm * 0.9);
@@ -238,17 +241,23 @@ const FRAG = /* glsl */ `
 `;
 
 export function CfdTopologyLab() {
+  const stageRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const [fieldMode, setFieldMode] = useState<CfdFieldMode>('topology');
   const [obstacle, setObstacle] = useState<ObstacleType>('airfoil');
   const [reynolds, setReynolds] = useState<number>(1250);
   const [velocity, setVelocity] = useState<number>(0.65);
+  const [aoaDeg, setAoaDeg] = useState<number>(8);
+  const [paused, setPaused] = useState<boolean>(false);
 
   const stateRef = useRef({
     mode: MODE_NUM.topology,
     obstacle: OBSTACLE_NUM.airfoil,
     reynolds: 1250,
     velocity: 0.65,
+    angleRad: (8 * Math.PI) / 180,
+    paused: false,
   });
 
   useEffect(() => {
@@ -257,8 +266,10 @@ export function CfdTopologyLab() {
       obstacle: OBSTACLE_NUM[obstacle],
       reynolds,
       velocity,
+      angleRad: (aoaDeg * Math.PI) / 180,
+      paused,
     };
-  }, [fieldMode, obstacle, reynolds, velocity]);
+  }, [fieldMode, obstacle, reynolds, velocity, aoaDeg, paused]);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -266,10 +277,16 @@ export function CfdTopologyLab() {
 
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false,
+        preserveDrawingBuffer: true,
+        powerPreference: 'high-performance',
+      });
     } catch {
       return;
     }
+    rendererRef.current = renderer;
 
     const isMobile = window.innerWidth < 768;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
@@ -286,6 +303,7 @@ export function CfdTopologyLab() {
       uTime: { value: 0 },
       uReynolds: { value: stateRef.current.reynolds },
       uVelocity: { value: stateRef.current.velocity },
+      uAngleRad: { value: stateRef.current.angleRad },
       uMode: { value: stateRef.current.mode },
       uObstacle: { value: stateRef.current.obstacle },
     };
@@ -338,32 +356,39 @@ export function CfdTopologyLab() {
     );
     observer.observe(container);
 
-    const clock = new THREE.Clock();
-    const animate = () => {
-      rafId = requestAnimationFrame(animate);
-      if (!visible) return;
-      const elapsed = clock.getElapsedTime();
+    let simTime = 0;
+    let lastTs = performance.now();
 
-      if (pointerActive < 0.05) {
-        targetMouse.x = 0.58 + Math.sin(elapsed * 0.6) * 0.16;
-        targetMouse.y = 0.5 + Math.cos(elapsed * 0.5) * 0.14;
+    const animate = (now: number) => {
+      rafId = requestAnimationFrame(animate);
+      const dt = Math.min(0.05, (now - lastTs) / 1000);
+      lastTs = now;
+      if (!visible) return;
+
+      if (!stateRef.current.paused) {
+        simTime += dt;
+        if (pointerActive < 0.05) {
+          targetMouse.x = 0.58 + Math.sin(simTime * 0.6) * 0.16;
+          targetMouse.y = 0.5 + Math.cos(simTime * 0.5) * 0.14;
+        }
       }
 
       currentMouse.x += (targetMouse.x - currentMouse.x) * 0.1;
       currentMouse.y += (targetMouse.y - currentMouse.y) * 0.1;
       pointerActive *= 0.96;
 
-      uniforms.uTime.value = elapsed;
+      uniforms.uTime.value = simTime;
       uniforms.uMouse.value.set(currentMouse.x, currentMouse.y);
       uniforms.uPointerActive.value = pointerActive;
       uniforms.uReynolds.value = stateRef.current.reynolds;
       uniforms.uVelocity.value = stateRef.current.velocity;
+      uniforms.uAngleRad.value = stateRef.current.angleRad;
       uniforms.uMode.value = stateRef.current.mode;
       uniforms.uObstacle.value = stateRef.current.obstacle;
 
       renderer.render(scene, camera);
     };
-    animate();
+    rafId = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -375,14 +400,48 @@ export function CfdTopologyLab() {
       geometry.dispose();
       material.dispose();
       renderer.dispose();
+      rendererRef.current = null;
       if (renderer.domElement.parentNode === container) {
         container.removeChild(renderer.domElement);
       }
     };
   }, []);
 
+  const handleExportPng = () => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    const url = renderer.domElement.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cfd-${obstacle}-${fieldMode}-Re${reynolds}.png`;
+    a.click();
+  };
+
+  const handleFullscreen = () => {
+    const el = stageRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      el.requestFullscreen?.().catch(() => {});
+    }
+  };
+
   const strouhal = (0.198 * (1 - 19.7 / Math.max(reynolds, 40))).toFixed(3);
-  const regime = reynolds < 400 ? 'Laminar Flow' : reynolds < 1400 ? 'Vortex Shedding' : 'Turbulent Wake';
+  const aoaRad = (aoaDeg * Math.PI) / 180;
+  const isStalled = obstacle === 'airfoil' && Math.abs(aoaDeg) >= 14;
+  // Thin-airfoil lift approximation with post-stall drop
+  const clVal =
+    obstacle === 'airfoil'
+      ? (isStalled ? Math.sign(aoaDeg) * (1.25 - (Math.abs(aoaDeg) - 14) * 0.08) : 2 * Math.PI * Math.sin(aoaRad)).toFixed(2)
+      : '0.00';
+  const regime = isStalled
+    ? 'Flow Separation / Stall'
+    : reynolds < 400
+      ? 'Laminar Flow'
+      : reynolds < 1400
+        ? 'Vortex Shedding'
+        : 'Turbulent Wake';
 
   return (
     <section id="cfd-lab" className="relative bg-[#0B0C10] px-5 py-16 text-white md:px-16 md:py-28">
@@ -413,24 +472,57 @@ export function CfdTopologyLab() {
         </div>
 
         {/* Main Interactive WebGL Stage + HUD Controls */}
-        <div className="overflow-hidden rounded-3xl border border-white/14 bg-[#11131A] shadow-2xl">
+        <div ref={stageRef} className="overflow-hidden rounded-3xl border border-white/14 bg-[#11131A] shadow-2xl">
           {/* Live WebGL Canvas */}
           <div className="relative aspect-[4/3] w-full cursor-crosshair sm:aspect-[16/9]">
             <div ref={mountRef} className="absolute inset-0 h-full w-full" />
 
-            {/* Top HUD Bar: Live CFD Telemetry */}
-            <div className="pointer-events-none absolute top-3 right-3 left-3 flex flex-wrap items-center justify-between gap-2 md:top-5 md:right-5 md:left-5">
-              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 font-mono text-[10px] text-white/90 backdrop-blur-md md:text-[11px]">
+            {/* Top HUD Bar: Live CFD Telemetry + Cinema Actions */}
+            <div className="absolute top-3 right-3 left-3 flex flex-wrap items-center justify-between gap-2 md:top-5 md:right-5 md:left-5">
+              <div className="pointer-events-none flex flex-wrap items-center gap-2 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 font-mono text-[10px] text-white/90 backdrop-blur-md md:text-[11px]">
                 <Activity className="h-3.5 w-3.5 text-[#00F0FF]" />
                 <span>Re = {reynolds}</span>
                 <span className="text-white/35">|</span>
                 <span>St ≈ {strouhal}</span>
-                <span className="hidden text-white/35 sm:inline">|</span>
-                <span className="hidden text-[#60A5FA] sm:inline">{regime}</span>
+                {obstacle === 'airfoil' && (
+                  <>
+                    <span className="text-white/35">|</span>
+                    <span>α = {aoaDeg}°</span>
+                    <span className="hidden text-white/35 sm:inline">|</span>
+                    <span className="hidden text-emerald-400 sm:inline">CL ≈ {clVal}</span>
+                  </>
+                )}
+                <span className="hidden text-white/35 md:inline">|</span>
+                <span className={`hidden md:inline ${isStalled ? 'text-rose-400' : 'text-[#60A5FA]'}`}>{regime}</span>
               </div>
 
-              <div className="rounded-full border border-white/15 bg-black/55 px-3 py-1.5 font-mono text-[10px] text-white/75 backdrop-blur-md">
-                Move / Drag to Perturb Flow
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setPaused((p) => !p)}
+                  title={paused ? 'Resume solver' : 'Freeze flow field'}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 font-mono text-[10px] text-white/90 backdrop-blur-md transition-colors hover:bg-[#455CE9]"
+                >
+                  {paused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+                  <span className="hidden sm:inline">{paused ? 'Resume' : 'Freeze'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportPng}
+                  title="Export CFD contour plot as PNG"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 font-mono text-[10px] text-white/90 backdrop-blur-md transition-colors hover:bg-[#455CE9]"
+                >
+                  <Camera className="h-3 w-3" />
+                  <span className="hidden sm:inline">Export PNG</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFullscreen}
+                  title="Toggle Fullscreen Wind Tunnel"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/90 backdrop-blur-md transition-colors hover:bg-[#455CE9]"
+                >
+                  <Maximize2 className="h-3 w-3" />
+                </button>
               </div>
             </div>
 
@@ -532,6 +624,27 @@ export function CfdTopologyLab() {
                 />
               </div>
 
+              {obstacle === 'airfoil' && (
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between font-mono text-[10px] tracking-wider text-white/65 uppercase">
+                    <span>Angle of Attack (α)</span>
+                    <span className={isStalled ? 'text-rose-400' : 'text-white'}>
+                      {aoaDeg}° {isStalled ? '· STALL' : `· CL ${clVal}`}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={-15}
+                    max={18}
+                    step={1}
+                    value={aoaDeg}
+                    onChange={(e) => setAoaDeg(Number(e.target.value))}
+                    aria-label="Angle of attack"
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-white/15 accent-emerald-400"
+                  />
+                </div>
+              )}
+
               <div className="flex items-center justify-between pt-1">
                 <button
                   type="button"
@@ -540,6 +653,8 @@ export function CfdTopologyLab() {
                     setObstacle('airfoil');
                     setReynolds(1250);
                     setVelocity(0.65);
+                    setAoaDeg(8);
+                    setPaused(false);
                   }}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-white/8 px-3 py-1.5 font-mono text-[11px] text-white/75 transition-colors hover:bg-white/15 hover:text-white"
                 >
