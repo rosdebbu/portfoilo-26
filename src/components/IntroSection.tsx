@@ -38,7 +38,7 @@ export function IntroSection({ onNavigate }: IntroSectionProps) {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-white px-5 py-16 text-[#111111] md:px-16 md:py-36"
+      className="relative overflow-hidden bg-white px-5 pt-16 pb-24 text-[#111111] md:px-16 md:pt-36 md:pb-44"
     >
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-12 md:items-start md:gap-12">
         {/* Left: Word-by-word masked reveal (Dennis Snellenberg) */}
@@ -74,6 +74,28 @@ export function IntroSection({ onNavigate }: IntroSectionProps) {
             About me
           </MagneticButton>
         </div>
+      </div>
+
+      {/* Geometric Waveform Transition into #cfd-lab */}
+      <div className="pointer-events-none absolute right-0 bottom-0 left-0 w-full leading-none" aria-hidden="true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+          className="block h-16 w-full sm:h-24 md:h-32"
+        >
+          <path
+            fill="#0099ff"
+            fillOpacity="0.22"
+            transform="translate(0, -14)"
+            d="M0,128L68.6,160L137.1,160L205.7,32L274.3,128L342.9,224L411.4,192L480,64L548.6,32L617.1,256L685.7,192L754.3,288L822.9,32L891.4,256L960,32L1028.6,288L1097.1,288L1165.7,0L1234.3,160L1302.9,128L1371.4,64L1440,160L1440,320L1371.4,320L1302.9,320L1234.3,320L1165.7,320L1097.1,320L1028.6,320L960,320L891.4,320L822.9,320L754.3,320L685.7,320L617.1,320L548.6,320L480,320L411.4,320L342.9,320L274.3,320L205.7,320L137.1,320L68.6,320L0,320Z"
+          />
+          <path
+            fill="#0B0C10"
+            fillOpacity="1"
+            d="M0,128L68.6,160L137.1,160L205.7,32L274.3,128L342.9,224L411.4,192L480,64L548.6,32L617.1,256L685.7,192L754.3,288L822.9,32L891.4,256L960,32L1028.6,288L1097.1,288L1165.7,0L1234.3,160L1302.9,128L1371.4,64L1440,160L1440,320L1371.4,320L1302.9,320L1234.3,320L1165.7,320L1097.1,320L1028.6,320L960,320L891.4,320L822.9,320L754.3,320L685.7,320L617.1,320L548.6,320L480,320L411.4,320L342.9,320L274.3,320L205.7,320L137.1,320L68.6,320L0,320Z"
+          />
+        </svg>
       </div>
     </section>
   );
