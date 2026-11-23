@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --accent: #455CE9;
+    --dark-surface: #1C1D20;
+    --dark-elevated: #24262B;
+    --light-surface: #FFFFFF;
+    --light-muted: #F3F3F3;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: auto;
+    overflow-x: clip;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: clip;
+    background-color: var(--dark-surface);
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* ===== Infinite Marquee (Dennis Snellenberg Hero) ===== */
+@keyframes marquee-scroll {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 26s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ===== Pure CSS 3D Spinning Wireframe Globe (Dennis Snellenberg) ===== */
+.globe-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  transform: rotate(15deg);
+}
+
+@keyframes globe-spin {
+  0% {
+    transform: translate(-50%, -50%) rotateY(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateY(360deg);
+  }
+}
+
+.globe-meridian {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  animation: globe-spin 5.5s linear infinite;
+}
+
+.globe-meridian-2 {
+  width: 58%;
+  animation-delay: -1.8s;
+}
+
+.globe-meridian-3 {
+  width: 24%;
+  animation-delay: -3.6s;
+}
+
+.globe-equator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-50%);
+}
+
+.globe-lat-top {
+  position: absolute;
+  top: 24%;
+  left: 8%;
+  width: 84%;
+  height: 1.2px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.globe-lat-bot {
+  position: absolute;
+  bottom: 24%;
+  left: 8%;
+  width: 84%;
+  height: 1.2px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* ===== Horizontal Filter Scroll-Fade Mask (recent.design) ===== */
+.scroll-fade-mask {
+  -webkit-mask-image: linear-gradient(to right, black 0px, black calc(100% - 36px), transparent 100%);
+  mask-image: linear-gradient(to right, black 0px, black calc(100% - 36px), transparent 100%);
+  scrollbar-width: none;
+}
+
+.scroll-fade-mask::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== Hand-drawn Rough Notation Underline/Badge (recent.design) ===== */
+@keyframes rough-dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.rough-path {
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  animation: rough-dash 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+}
+
+/* ===== Magnetic Button Fill Wipe (Dennis Snellenberg) ===== */
+.magnetic-fill {
+  position: absolute;
+  inset: -40% -20%;
+  border-radius: 50%;
+  transform: translate3d(0, 100%, 0);
+  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+  pointer-events: none;
+}
+
+.magnetic-btn:hover .magnetic-fill {
+  transform: translate3d(0, 0%, 0);
+}
+
+/* ===== Word-by-word Reveal Mask ===== */
+.word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.word-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* ===== Subtle Noise Overlay ===== */
+.grain-overlay {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 0);
+  background-size: 24px 24px;
+}
