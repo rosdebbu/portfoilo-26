@@ -46,7 +46,6 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
     return () => window.removeEventListener('mousemove', onMouseMove);
   }, [viewMode]);
 
-  // Escape key closes detail modal
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onSelectProject(null);
@@ -61,16 +60,16 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
   };
 
   return (
-    <section id="work" className="relative bg-white px-6 py-24 text-[#111111] md:px-16 md:py-32">
+    <section id="work" className="relative bg-[#0C0D12] px-5 py-20 text-white md:px-16 md:py-28">
       <div className="mx-auto max-w-6xl">
-        {/* Section Header + recent.design Rough Notation accent + View Toggle */}
+        {/* Section Header + Rough Notation accent + View Toggle */}
         <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
             <div className="mb-3 flex items-center gap-3">
-              <span className="font-mono text-xs tracking-[0.2em] text-[#666666] uppercase">
+              <span className="font-mono text-xs tracking-[0.2em] text-[#60A5FA] uppercase">
                 04 / Selected Work
               </span>
-              <span className="relative inline-flex items-center px-2 py-0.5 font-mono text-[11px] font-medium text-[#E11D48]">
+              <span className="relative inline-flex items-center px-2 py-0.5 font-mono text-[11px] font-medium text-[#F472B6]">
                 interactive
                 <svg
                   className="pointer-events-none absolute -inset-x-1 -inset-y-0.5 h-[calc(100%+4px)] w-[calc(100%+8px)]"
@@ -80,7 +79,7 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                 >
                   <path
                     d="M6 18 C 12 4, 98 2, 104 14 C 108 25, 18 28, 7 20"
-                    stroke="#E11D48"
+                    stroke="#F472B6"
                     strokeWidth="1.6"
                     strokeLinecap="round"
                     className="rough-path"
@@ -88,13 +87,13 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                 </svg>
               </span>
             </div>
-            <h2 className="font-display text-4xl font-medium tracking-[-0.03em] text-[#111111] sm:text-5xl">
+            <h2 className="font-display text-4xl font-medium tracking-[-0.03em] text-white sm:text-5xl">
               Recent Work &amp; Archive
             </h2>
           </div>
 
-          {/* Toggle between Dennis Snellenberg List View and recent.design Grid View */}
-          <div className="inline-flex w-fit items-center gap-1 rounded-full bg-[#F3F3F3] p-1">
+          {/* Toggle between List View and Gallery Grid */}
+          <div className="inline-flex w-fit items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
             <button
               type="button"
               onClick={() => {
@@ -102,7 +101,7 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                 setHoveredIndex(null);
               }}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-all ${
-                viewMode === 'list' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#555555] hover:text-[#111111]'
+                viewMode === 'list' ? 'bg-[#455CE9] text-white shadow-sm' : 'text-white/65 hover:text-white'
               }`}
             >
               <List className="h-3.5 w-3.5" />
@@ -115,7 +114,7 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                 setHoveredIndex(null);
               }}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-all ${
-                viewMode === 'grid' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#555555] hover:text-[#111111]'
+                viewMode === 'grid' ? 'bg-[#455CE9] text-white shadow-sm' : 'text-white/65 hover:text-white'
               }`}
             >
               <LayoutGrid className="h-3.5 w-3.5" />
@@ -124,8 +123,8 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
           </div>
         </div>
 
-        {/* Sticky Filter Bar with recent.design scroll-fade-mask */}
-        <div className="sticky top-0 z-30 -mx-2 mb-10 bg-white/90 px-2 py-3 backdrop-blur-md">
+        {/* Sticky Filter Bar (dark frosted glass) */}
+        <div className="sticky top-0 z-30 -mx-2 mb-10 bg-[#0C0D12]/90 px-2 py-3 backdrop-blur-md">
           <div className="scroll-fade-mask flex items-center gap-2 overflow-x-auto pr-18 md:pr-10">
             {CATEGORIES.map((cat) => {
               const active = activeCategory === cat;
@@ -139,8 +138,8 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                   }}
                   className={`shrink-0 rounded-full px-4 py-2 text-xs font-medium transition-all ${
                     active
-                      ? 'bg-[#111111] text-white'
-                      : 'bg-[#F3F3F3] text-[#555555] hover:bg-[#E5E7EB] hover:text-[#111111]'
+                      ? 'bg-white text-[#111111]'
+                      : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/12 hover:text-white'
                   }`}
                 >
                   {cat}
@@ -150,9 +149,9 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
           </div>
         </div>
 
-        {/* ===== VIEW 1: DENNIS SNELLENBERG LIST VIEW (Desktop rows + Mobile live preview tiles) ===== */}
+        {/* ===== VIEW 1: LIST VIEW (Desktop rows + Mobile inline simulation tiles) ===== */}
         {viewMode === 'list' ? (
-          <div className="border-t border-[#E5E7EB]">
+          <div className="border-t border-white/10">
             {filteredProjects.map((project, idx) => {
               const isHovered = hoveredIndex === idx;
               return (
@@ -166,10 +165,10 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') onSelectProject(project);
                   }}
-                  className="group flex cursor-pointer flex-col justify-between gap-4 border-b border-[#E5E7EB] py-7 transition-colors duration-300 md:flex-row md:items-center md:px-4 md:py-11"
+                  className="group flex cursor-pointer flex-col justify-between gap-4 border-b border-white/10 py-7 transition-colors duration-300 hover:bg-white/[0.02] md:flex-row md:items-center md:px-4 md:py-10"
                 >
-                  {/* Mobile-only inline live simulation preview (Dennis .work-tiles style for touch screens) */}
-                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-[#111215] md:hidden">
+                  {/* Mobile-only inline live simulation preview */}
+                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10 bg-[#111215] md:hidden">
                     <ProjectSimCanvas
                       visualType={project.visualType}
                       accentFrom={project.accentFrom}
@@ -183,25 +182,25 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
 
                   <div className="transition-all duration-300 md:group-hover:translate-x-2">
                     <h3
-                      className={`font-display text-2xl font-medium tracking-tight transition-opacity duration-300 sm:text-4xl md:text-5xl ${
+                      className={`font-display text-2xl font-medium tracking-tight text-white transition-opacity duration-300 sm:text-4xl md:text-5xl ${
                         hoveredIndex !== null && !isHovered ? 'md:opacity-35' : 'opacity-100'
                       }`}
                     >
                       {project.title}
                     </h3>
-                    <p className="mt-1 text-xs leading-relaxed text-[#666666] md:hidden">{project.tagline}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-white/55 md:hidden">{project.tagline}</p>
                   </div>
 
                   <div className="flex items-center justify-between gap-8 transition-all duration-300 md:justify-end md:group-hover:-translate-x-2">
-                    <span className="text-xs font-medium text-[#555555] md:text-sm">{project.discipline}</span>
-                    <span className="font-mono text-xs text-[#888888]">{project.year}</span>
+                    <span className="text-xs font-medium text-white/65 md:text-sm">{project.discipline}</span>
+                    <span className="font-mono text-xs text-white/45">{project.year}</span>
                   </div>
                 </div>
               );
             })}
           </div>
         ) : (
-          /* ===== VIEW 2: RECENT.DESIGN AUTO-ANIMATING CARD GRID ===== */
+          /* ===== VIEW 2: DARK GALLERY CARD GRID ===== */
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => {
               const isSaved = !!savedIds[project.id];
@@ -209,19 +208,17 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                 <article
                   key={project.id}
                   onClick={() => onSelectProject(project)}
-                  className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#EAEAEA] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#14161F] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-2xl"
                 >
-                  {/* Animated simulation preview stage */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#111215]">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0B0C10]">
                     <ProjectSimCanvas
                       visualType={project.visualType}
                       accentFrom={project.accentFrom}
                       accentTo={project.accentTo}
                       bgTone={project.bgTone}
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-                    {/* Hover Save Button (recent.design) */}
                     <button
                       type="button"
                       onClick={(e) => toggleSave(e, project.id)}
@@ -235,7 +232,6 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                       <Bookmark className="h-4 w-4" fill={isSaved ? 'currentColor' : 'none'} />
                     </button>
 
-                    {/* Outbound Link Pill (bottom-right) */}
                     <a
                       href={project.liveUrl || project.githubUrl}
                       target="_blank"
@@ -252,20 +248,19 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                     </span>
                   </div>
 
-                  {/* Card Footer */}
                   <div className="flex flex-1 flex-col justify-between p-4">
                     <div>
                       <div className="flex items-baseline justify-between gap-2">
-                        <h3 className="font-display text-lg font-semibold text-[#111111]">{project.title}</h3>
-                        <span className="font-mono text-[11px] text-[#777777]">{project.year}</span>
+                        <h3 className="font-display text-lg font-semibold text-white">{project.title}</h3>
+                        <span className="font-mono text-[11px] text-white/45">{project.year}</span>
                       </div>
-                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#666666]">{project.tagline}</p>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/60">{project.tagline}</p>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {project.stack.slice(0, 3).map((t) => (
                         <span
                           key={t}
-                          className="rounded-md bg-[#F3F3F3] px-2 py-0.5 font-mono text-[10px] text-[#555555]"
+                          className="rounded-md bg-white/6 px-2 py-0.5 font-mono text-[10px] text-white/75"
                         >
                           {t}
                         </span>
@@ -279,12 +274,12 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
         )}
       </div>
 
-      {/* ===== DENNIS SNELLENBERG CURSOR-TRACKING FLOATING STACKED PREVIEW (Desktop List View) ===== */}
+      {/* ===== FLOATING STACKED PREVIEW (Desktop List View) ===== */}
       {viewMode === 'list' && (
         <>
           <div
             ref={modalRef}
-            className={`pointer-events-none fixed top-0 left-0 z-40 hidden h-[320px] w-[360px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] lg:block ${
+            className={`pointer-events-none fixed top-0 left-0 z-40 hidden h-[320px] w-[360px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-white/15 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] lg:block ${
               hoveredIndex !== null ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
             }`}
           >
@@ -308,7 +303,7 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                       bgTone={project.bgTone}
                     />
                   </div>
-                  <div className="relative z-10 rounded-xl bg-black/50 px-3.5 py-2 backdrop-blur-md">
+                  <div className="relative z-10 rounded-xl bg-black/55 px-3.5 py-2 backdrop-blur-md">
                     <div className="font-mono text-[10px] text-white/65 uppercase">{project.category}</div>
                     <div className="font-display text-sm font-medium text-white">{project.tagline}</div>
                   </div>
@@ -317,7 +312,6 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
             </div>
           </div>
 
-          {/* Floating #455CE9 "View" Cursor Pill */}
           <div
             ref={cursorPillRef}
             className={`pointer-events-none fixed top-0 left-0 z-50 hidden h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#455CE9] text-sm font-medium text-white shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] lg:flex ${
@@ -329,10 +323,10 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
         </>
       )}
 
-      {/* ===== RECENT.DESIGN 3-COLUMN STYLE DETAIL MODAL ===== */}
+      {/* ===== DARK 3-COLUMN STYLE DETAIL MODAL ===== */}
       {selectedProject && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm md:p-8"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md md:p-8"
           onClick={() => onSelectProject(null)}
         >
           <div
@@ -340,17 +334,16 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
             aria-modal="true"
             aria-label={selectedProject.title}
             onClick={(e) => e.stopPropagation()}
-            className="grid max-h-[90vh] w-full max-w-5xl grid-cols-1 overflow-y-auto rounded-3xl bg-white text-[#111111] shadow-2xl md:grid-cols-12 md:overflow-hidden"
+            className="grid max-h-[90vh] w-full max-w-5xl grid-cols-1 overflow-y-auto rounded-3xl border border-white/15 bg-[#12141C] text-white shadow-2xl md:grid-cols-12 md:overflow-hidden"
           >
-            {/* Left Metadata Column (recent.design aside[data-item-metadata]) */}
-            <aside className="flex flex-col justify-between border-b border-[#EAEAEA] p-6 md:col-span-5 md:overflow-y-auto md:border-r md:border-b-0 md:p-8">
+            <aside className="flex flex-col justify-between border-b border-white/10 p-6 md:col-span-5 md:overflow-y-auto md:border-r md:border-b-0 md:p-8">
               <div>
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <span className="font-mono text-[11px] tracking-wider text-[#666666] uppercase">
+                    <span className="font-mono text-[11px] tracking-wider text-[#60A5FA] uppercase">
                       {selectedProject.category} · {selectedProject.period}
                     </span>
-                    <h3 className="mt-1 font-display text-2xl font-semibold tracking-tight text-[#111111]">
+                    <h3 className="mt-1 font-display text-2xl font-semibold tracking-tight text-white">
                       {selectedProject.title}
                     </h3>
                   </div>
@@ -358,30 +351,28 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                     type="button"
                     onClick={() => onSelectProject(null)}
                     aria-label="Close modal"
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3F3F3] text-[#111111] transition-colors hover:bg-[#111111] hover:text-white"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                <p className="mt-4 text-sm leading-relaxed text-[#4B5563]">{selectedProject.summary}</p>
+                <p className="mt-4 text-sm leading-relaxed text-white/65">{selectedProject.summary}</p>
 
-                {/* Metrics row */}
-                <div className="mt-6 grid grid-cols-2 gap-3 border-y border-[#EAEAEA] py-4">
+                <div className="mt-6 grid grid-cols-2 gap-3 border-y border-white/10 py-4">
                   {selectedProject.metrics.map((m) => (
                     <div key={m.label}>
-                      <div className="font-mono text-[10px] tracking-wider text-[#777777] uppercase">{m.label}</div>
-                      <div className="font-display text-lg font-semibold text-[#111111]">{m.value}</div>
+                      <div className="font-mono text-[10px] tracking-wider text-white/45 uppercase">{m.label}</div>
+                      <div className="font-display text-lg font-semibold text-white">{m.value}</div>
                     </div>
                   ))}
                 </div>
 
-                {/* Highlights */}
                 <div className="mt-5">
-                  <div className="mb-2 font-mono text-[10px] tracking-wider text-[#777777] uppercase">
+                  <div className="mb-2 font-mono text-[10px] tracking-wider text-white/45 uppercase">
                     Key Highlights
                   </div>
-                  <ul className="space-y-2 text-xs leading-relaxed text-[#374151]">
+                  <ul className="space-y-2 text-xs leading-relaxed text-white/75">
                     {selectedProject.highlights.map((h) => (
                       <li key={h} className="flex gap-2">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#455CE9]" />
@@ -391,14 +382,13 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                   </ul>
                 </div>
 
-                {/* Stack tags */}
                 <div className="mt-5">
-                  <div className="mb-2 font-mono text-[10px] tracking-wider text-[#777777] uppercase">Tech Stack</div>
+                  <div className="mb-2 font-mono text-[10px] tracking-wider text-white/45 uppercase">Tech Stack</div>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedProject.stack.map((t) => (
                       <span
                         key={t}
-                        className="rounded-full bg-[#F3F3F3] px-3 py-1 font-mono text-[11px] text-[#333333]"
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[11px] text-white/80"
                       >
                         {t}
                       </span>
@@ -407,13 +397,12 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                 </div>
               </div>
 
-              {/* Action Links */}
-              <div className="mt-6 flex flex-wrap gap-2.5 pt-4 border-t border-[#EAEAEA]">
+              <div className="mt-6 flex flex-wrap gap-2.5 border-t border-white/10 pt-4">
                 <a
                   href={selectedProject.githubUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#111111] px-5 py-2.5 text-xs font-medium text-white transition-colors hover:bg-[#455CE9]"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#455CE9] px-5 py-2.5 text-xs font-medium text-white transition-colors hover:bg-[#334BD3]"
                 >
                   <Code2 className="h-3.5 w-3.5" />
                   <span>View Source</span>
@@ -423,7 +412,7 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                     href={selectedProject.liveUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#D1D5DB] px-5 py-2.5 text-xs font-medium text-[#111111] transition-colors hover:border-[#111111]"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-xs font-medium text-white/90 transition-colors hover:border-white hover:text-white"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     <span>Live Demo</span>
@@ -434,7 +423,7 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                     href={selectedProject.paperUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#D1D5DB] px-5 py-2.5 text-xs font-medium text-[#111111] transition-colors hover:border-[#111111]"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2.5 text-xs font-medium text-white/90 transition-colors hover:border-white hover:text-white"
                   >
                     <ArrowUpRight className="h-3.5 w-3.5" />
                     <span>Zenodo Paper</span>
@@ -443,9 +432,8 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
               </div>
             </aside>
 
-            {/* Right #EFEFEF Showcase Stage (shows on top on mobile for immediate visual impact) */}
-            <div className="order-first flex flex-col items-center justify-center bg-[#EFEFEF] p-5 md:order-last md:col-span-7 md:p-10">
-              <div className="w-full overflow-hidden rounded-2xl bg-[#111215] shadow-2xl ring-1 ring-black/10">
+            <div className="order-first flex flex-col items-center justify-center bg-[#090A0F] p-5 md:order-last md:col-span-7 md:p-10">
+              <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-[#111215] shadow-2xl">
                 <div className="flex items-center justify-between border-b border-white/10 bg-[#18191D] px-4 py-2.5">
                   <div className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
@@ -463,7 +451,7 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                   />
                 </div>
               </div>
-              <p className="mt-4 text-center font-mono text-[11px] text-[#666666]">
+              <p className="mt-4 text-center font-mono text-[11px] text-white/45">
                 Interactive visual simulation preview · Press ESC or click outside to close
               </p>
             </div>
