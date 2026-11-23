@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowDownLeft } from 'lucide-react';
 import { PROFILE } from '../data/portfolioData';
 import { MagneticButton } from './MagneticButton';
 
-export function CurvedFooter() {
-  const footerRef = useRef<HTMLElement>(null);
+interface CurvedFooterProps {
+  onOpenContact: () => void;
+}
+
+export function CurvedFooter({ onOpenContact }: CurvedFooterProps) {
   const [istTime, setIstTime] = useState<string>('');
 
-  // Real-time IST clock (Dennis Snellenberg live local time)
   useEffect(() => {
     const updateClock = () => {
       try {
@@ -29,30 +31,8 @@ export function CurvedFooter() {
   }, []);
 
   return (
-    <footer id="contact" ref={footerRef} className="relative overflow-hidden bg-[#1C1D20] text-white">
-      {/* Smooth Wave SVG Transition from White About Section into Dark Footer */}
-      <div className="relative w-full bg-white leading-none" aria-hidden="true">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 1440 320"
-          preserveAspectRatio="none"
-          className="block h-16 w-full sm:h-24 md:h-32"
-        >
-          <path
-            fill="#0099ff"
-            fillOpacity="0.22"
-            transform="translate(0, -14)"
-            d="M0,32L48,69.3C96,107,192,181,288,202.7C384,224,480,192,576,160C672,128,768,96,864,112C960,128,1056,192,1152,181.3C1248,171,1344,85,1392,42.7L1440,0L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          />
-          <path
-            fill="#1C1D20"
-            fillOpacity="1"
-            d="M0,32L48,69.3C96,107,192,181,288,202.7C384,224,480,192,576,160C672,128,768,96,864,112C960,128,1056,192,1152,181.3C1248,171,1344,85,1392,42.7L1440,0L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          />
-        </svg>
-      </div>
-
-      <div className="mx-auto max-w-6xl px-5 pt-16 pb-10 md:px-16 md:pt-28 md:pb-12">
+    <footer id="contact" className="relative overflow-hidden bg-[#090A0E] text-white">
+      <div className="mx-auto max-w-6xl px-5 pt-16 pb-10 md:px-16 md:pt-24 md:pb-12">
         {/* Top Row: Avatar + Let's work together + Arrow */}
         <div className="flex items-end justify-between gap-6">
           <div>
@@ -74,13 +54,13 @@ export function CurvedFooter() {
           <ArrowDownLeft className="hidden h-8 w-8 text-white/75 md:block" strokeWidth={1.6} />
         </div>
 
-        {/* Horizontal Rule Intersected by Magnetic #455CE9 "Get in touch" Circle */}
+        {/* Horizontal Rule Intersected by Magnetic #455CE9 "Get in touch" Circle (opens Contact Modal!) */}
         <div className="relative my-12 md:my-20">
           <div className="h-[1px] w-full bg-white/15" />
           <div className="mt-6 flex justify-end md:absolute md:top-1/2 md:right-12 md:mt-0 md:-translate-y-1/2">
             <MagneticButton
-              href={`mailto:${PROFILE.email}`}
-              className="h-32 w-32 rounded-full bg-[#455CE9] text-sm font-medium text-white shadow-2xl shadow-[#455CE9]/30 md:h-44 md:w-44 md:text-base"
+              onClick={onOpenContact}
+              className="h-32 w-32 rounded-full bg-[#455CE9] text-sm font-medium text-white shadow-2xl shadow-[#455CE9]/35 md:h-44 md:w-44 md:text-base"
               fillClassName="bg-[#334BD3]"
               strength={0.42}
               textStrength={0.22}
@@ -93,7 +73,7 @@ export function CurvedFooter() {
         {/* Contact Pill Buttons */}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
           <MagneticButton
-            href={`mailto:${PROFILE.email}`}
+            onClick={onOpenContact}
             className="w-full rounded-full border border-white/25 px-6 py-3.5 text-xs font-medium text-white sm:w-auto md:px-7 md:py-4 md:text-sm"
             fillClassName="bg-[#455CE9]"
             strength={0.24}
