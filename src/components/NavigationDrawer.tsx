@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { id: 'cfd-lab', label: 'CFD Lab' },
   { id: 'spotlight', label: 'Spotlight' },
   { id: 'work', label: 'Work' },
+  { id: 'visuals', label: 'Visuals' },
   { id: 'about', label: 'About' },
   { id: 'contact', label: 'Contact' },
 ];
