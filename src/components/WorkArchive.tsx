@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { ArrowUpRight, Bookmark, Code2, ExternalLink, LayoutGrid, List, X } from 'lucide-react';
+import { ArrowUpRight, Bookmark, Check, Code2, ExternalLink, LayoutGrid, Link2, List, X } from 'lucide-react';
 import { PROJECTS, type ProjectCategory, type ProjectItem } from '../data/portfolioData';
 import { ProjectSimCanvas } from './ProjectSimCanvas';
 
@@ -16,6 +16,18 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
   const [activeCategory, setActiveCategory] = useState<ProjectCategory>('All');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [savedIds, setSavedIds] = useState<Record<string, boolean>>({});
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleCopyShareLink = async (id: string) => {
+    try {
+      const shareUrl = `${window.location.origin}/?project=${id}`;
+      await navigator.clipboard.writeText(shareUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
 
   // Dennis Snellenberg cursor-tracking preview modal refs
   const modalRef = useRef<HTMLDivElement>(null);
@@ -429,6 +441,14 @@ export function WorkArchive({ selectedProject, onSelectProject }: WorkArchivePro
                     <span>Zenodo Paper</span>
                   </a>
                 )}
+                <button
+                  type="button"
+                  onClick={() => handleCopyShareLink(selectedProject.id)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white/85 transition-colors hover:bg-white/12 hover:text-white"
+                >
+                  {linkCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Link2 className="h-3.5 w-3.5" />}
+                  <span>{linkCopied ? 'Link copied' : 'Share link'}</span>
+                </button>
               </div>
             </aside>
 

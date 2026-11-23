@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { ProjectItem } from './data/portfolioData';
+import { PROJECTS, type ProjectItem } from './data/portfolioData';
 import { Preloader } from './components/Preloader';
 import { NavigationDrawer } from './components/NavigationDrawer';
 import { HeroSection } from './components/HeroSection';
@@ -16,6 +16,7 @@ import { CurvedFooter } from './components/CurvedFooter';
 import { WaveDivider } from './components/WaveDivider';
 import { ContactModal } from './components/ContactModal';
 import { VerticalRuler } from './components/VerticalRuler';
+import { BlueprintBackground } from './components/BlueprintBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,9 +45,30 @@ function lerpColor(progress: number): string {
 
 export function App() {
   const lenisRef = useRef<Lenis | null>(null);
-  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(() => {
+    try {
+      const slug = new URLSearchParams(window.location.search).get('project');
+      if (slug) return PROJECTS.find((p) => p.id === slug) ?? null;
+    } catch {
+      // ignore
+    }
+    return null;
+  });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+
+  // Keep ?project=<id> synced for shareable deep links
+  const handleSelectProject = useCallback((project: ProjectItem | null) => {
+    setSelectedProject(project);
+    try {
+      const url = new URL(window.location.href);
+      if (project) url.searchParams.set('project', project.id);
+      else url.searchParams.delete('project');
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -98,20 +120,21 @@ export function App() {
   return (
     <div className="min-h-screen w-full bg-[#090A0E] text-white">
       <Preloader onComplete={handlePreloaderComplete} />
+      <BlueprintBackground />
       <NavigationDrawer open={drawerOpen} setOpen={setDrawerOpen} onNavigate={handleNavigate} />
       <VerticalRuler />
       <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
 
-      <main>
+      <main className="relative z-20">
         <HeroSection onNavigate={handleNavigate} onOpenMenu={() => setDrawerOpen(true)} />
         <WaveDivider fromColor="#14151A" toColor="#111218" variant="gentle" accent={false} />
         <IntroSection onNavigate={handleNavigate} />
         <WaveDivider fromColor="#111218" toColor="#0B0C10" variant="flow" />
         <CfdTopologyLab />
         <WaveDivider fromColor="#0B0C10" toColor="#111215" variant="swell" />
-        <SpotlightChapters onSelectProject={setSelectedProject} />
+        <SpotlightChapters onSelectProject={handleSelectProject} />
         <WaveDivider fromColor="#111215" toColor="#0C0D12" variant="gentle" />
-        <WorkArchive selectedProject={selectedProject} onSelectProject={setSelectedProject} />
+        <WorkArchive selectedProject={selectedProject} onSelectProject={handleSelectProject} />
         <WaveDivider fromColor="#0C0D12" toColor="#0F1117" variant="flow" />
         <VisualsGallery />
         <WaveDivider fromColor="#0F1117" toColor="#13151E" variant="swell" />

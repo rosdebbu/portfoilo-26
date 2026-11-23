@@ -30,21 +30,28 @@ export function HeroSection({ onNavigate, onOpenMenu }: HeroSectionProps) {
       {/* Top Block (Header + Mobile Compact Top Info so portrait center stays completely open) */}
       <div className="relative z-20 flex flex-col">
         <header className="flex items-center justify-between px-4 py-4 md:px-12 md:py-7">
-          <button
-            type="button"
-            onClick={() => onNavigate('hero')}
-            className="group flex items-center gap-1.5 text-xs font-medium tracking-tight text-white/95 sm:text-sm"
-          >
-            <span className="inline-block transition-transform duration-500 group-hover:rotate-[360deg]">©</span>
-            <span className="relative flex h-5 items-center overflow-hidden">
-              <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-full">
-                Code by Debjit
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onNavigate('hero')}
+              className="group flex items-center gap-1.5 text-xs font-medium tracking-tight text-white/95 sm:text-sm"
+            >
+              <span className="inline-block transition-transform duration-500 group-hover:rotate-[360deg]">©</span>
+              <span className="relative flex h-5 items-center overflow-hidden">
+                <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-full">
+                  Code by Debjit
+                </span>
+                <span className="absolute top-full left-0 inline-block transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-full">
+                  Debjit Das · SRMIST
+                </span>
               </span>
-              <span className="absolute top-full left-0 inline-block transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-full">
-                Debjit Das · SRMIST
-              </span>
+            </button>
+
+            <span className="hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[10px] text-emerald-300 backdrop-blur-md sm:inline-flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Open to Internships
             </span>
-          </button>
+          </div>
 
           <nav className="hidden items-center gap-2 md:flex">
             {[
