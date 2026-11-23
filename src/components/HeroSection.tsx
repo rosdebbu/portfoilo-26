@@ -201,7 +201,7 @@ export function HeroSection({ onNavigate, onOpenMenu }: HeroSectionProps) {
               className="font-display text-[10vw] leading-[0.95] font-medium tracking-[-0.035em] whitespace-nowrap text-white md:text-[7.2vw]"
             >
               Debjit Das <span className="mx-4 font-light text-white/40 md:mx-6">—</span>
-              Creative Engineer <span className="mx-4 font-light text-white/40 md:mx-6">—</span>
+              CFD Engineer <span className="mx-4 font-light text-white/40 md:mx-6">—</span>
             </h1>
           ))}
         </div>
