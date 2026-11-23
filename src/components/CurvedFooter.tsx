@@ -1,15 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowDownLeft } from 'lucide-react';
 import { PROFILE } from '../data/portfolioData';
 import { MagneticButton } from './MagneticButton';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export function CurvedFooter() {
   const footerRef = useRef<HTMLElement>(null);
-  const domeRef = useRef<HTMLDivElement>(null);
   const [istTime, setIstTime] = useState<string>('');
 
   // Real-time IST clock (Dennis Snellenberg live local time)
@@ -33,39 +28,28 @@ export function CurvedFooter() {
     return () => clearInterval(id);
   }, []);
 
-  // Scroll-flattened curved dome transition (Dennis Snellenberg .rounded-div-wrap)
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      if (domeRef.current && footerRef.current) {
-        const startHeight = window.innerWidth < 768 ? 44 : 84;
-        gsap.fromTo(
-          domeRef.current,
-          { height: startHeight },
-          {
-            height: 0,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: footerRef.current,
-              start: 'top bottom',
-              end: 'top 35%',
-              scrub: true,
-            },
-          }
-        );
-      }
-    }, footerRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <footer id="contact" ref={footerRef} className="relative overflow-hidden bg-[#1C1D20] text-white">
-      {/* White curved dome that flattens as you scroll into the dark footer */}
-      <div ref={domeRef} className="relative h-[44px] w-full overflow-hidden md:h-[84px]">
-        <div
-          className="absolute bottom-0 left-1/2 h-[750%] w-[150%] -translate-x-1/2 rounded-[50%] bg-white shadow-2xl"
-          aria-hidden="true"
-        />
+      {/* Smooth Wave SVG Transition from White About Section into Dark Footer */}
+      <div className="relative w-full bg-white leading-none" aria-hidden="true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+          className="block h-16 w-full sm:h-24 md:h-32"
+        >
+          <path
+            fill="#0099ff"
+            fillOpacity="0.22"
+            transform="translate(0, -14)"
+            d="M0,32L48,69.3C96,107,192,181,288,202.7C384,224,480,192,576,160C672,128,768,96,864,112C960,128,1056,192,1152,181.3C1248,171,1344,85,1392,42.7L1440,0L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+          <path
+            fill="#1C1D20"
+            fillOpacity="1"
+            d="M0,32L48,69.3C96,107,192,181,288,202.7C384,224,480,192,576,160C672,128,768,96,864,112C960,128,1056,192,1152,181.3C1248,171,1344,85,1392,42.7L1440,0L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+        </svg>
       </div>
 
       <div className="mx-auto max-w-6xl px-5 pt-16 pb-10 md:px-16 md:pt-28 md:pb-12">
