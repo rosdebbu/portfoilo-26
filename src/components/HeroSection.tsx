@@ -107,16 +107,16 @@ export function HeroSection({ onNavigate, onOpenMenu }: HeroSectionProps) {
         </div>
       </div>
 
-      {/* DESKTOP-ONLY Middle Row (Dennis Snellenberg iconic layout preserved) */}
-      <div className="relative z-20 hidden items-center justify-between gap-8 md:flex">
-        {/* Location Hanger Pill */}
-        <div className="inline-flex w-fit items-center gap-5 rounded-r-full bg-[#1C1D20]/88 py-3 pr-4 pl-10 shadow-2xl ring-1 ring-white/12 backdrop-blur-md">
+      {/* DESKTOP-ONLY Middle Row (Location badge lifted higher so portrait stays balanced) */}
+      <div className="relative z-20 hidden items-start justify-between gap-8 md:flex">
+        {/* Location Hanger Pill — positioned higher up */}
+        <div className="-mt-12 inline-flex w-fit items-center gap-4 rounded-r-full bg-[#1C1D20]/88 py-2.5 pr-3.5 pl-8 shadow-2xl ring-1 ring-white/12 backdrop-blur-md">
           <div className="text-xs leading-snug font-medium text-white/85">
             <div>Located in</div>
             <div className="text-white">Chennai, India</div>
           </div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10">
-            <div className="globe-wrap" aria-hidden="true">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+            <div className="globe-wrap scale-[0.88]" aria-hidden="true">
               <div className="globe-meridian" />
               <div className="globe-meridian globe-meridian-2" />
               <div className="globe-meridian globe-meridian-3" />
@@ -197,10 +197,10 @@ export function HeroSection({ onNavigate, onOpenMenu }: HeroSectionProps) {
             <h1
               key={copy}
               aria-hidden={copy === 1}
-              className="font-display text-[14vw] leading-[0.92] font-medium tracking-[-0.04em] whitespace-nowrap text-white md:text-[13.5vw]"
+              className="font-display text-[10vw] leading-[0.95] font-medium tracking-[-0.035em] whitespace-nowrap text-white md:text-[7.2vw]"
             >
-              Debjit Das <span className="mx-4 font-light text-white/45 md:mx-6">—</span>
-              Creative Engineer <span className="mx-4 font-light text-white/45 md:mx-6">—</span>
+              Debjit Das <span className="mx-4 font-light text-white/40 md:mx-6">—</span>
+              Creative Engineer <span className="mx-4 font-light text-white/40 md:mx-6">—</span>
             </h1>
           ))}
         </div>
